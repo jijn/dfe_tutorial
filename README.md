@@ -2,7 +2,7 @@
 
 This short tutorial is used at the [ChiMaD Phase Field Workshop](https://github.com/usnistgov/pfhub/wiki#Workshops) XVI, March 19-21, 2024. The goal is to provide an introduction to the driving force extension method in our recent paper:
 
-Jin Zhang, Alexander F. Chadwick, David L. Chopp, Peter W. Voorhees, "Phase Field Modeling with Large Driving Forces," npj Computational Materials, 9 (2023) 166. doi: [10.1038/s41524-023-01118-0](https://doi.org/10.1038/s41524-023-01118-0)
+> Jin Zhang, Alexander F. Chadwick, David L. Chopp, Peter W. Voorhees, "Phase Field Modeling with Large Driving Forces," npj Computational Materials, 9 (2023) 166. doi: [10.1038/s41524-023-01118-0](https://doi.org/10.1038/s41524-023-01118-0)
 
 Here, a 1D KKS model is used for demonstration. Several assumptions are made for simplification so that we can focus on the problem of the large driving force and the driving force extension method.
 
@@ -34,6 +34,10 @@ The algorithm for the projection $\mathcal{P}(F)$ is well-developed in the level
 ## Using the code
 
 You will need *Python 3* installed. 
+
+If you don't have Python, you can use Colab (Google account is needed)
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jijn/dfe_tutorial/blob/main/driving_force_extension.ipynb)
 
 Also, you need *numpy* and *matplotlib*. Install them by
 
