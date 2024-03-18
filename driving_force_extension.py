@@ -155,11 +155,10 @@ def apply_bc(phi, c, xl, xr): # apply boundary conditions
 # In[3]:
 
 
-# velocity extension
+# velocity extension, u is the level-set, u=0 gives the location of the interface
 def velext_simple(u, f):
     i = np.where(u[:-1] * u[1:] < 0)[0][0] # find place where u crosses zero
-    t = u[i] / (u[i] - u[i+1])   # linear interpolation to locate the interface
-    return (1-t)*f[i] + t*f[i+1] # linearly interpolate the driving force
+    return (f[i+1]*u[i] - f[i]*u[i+1]) / (u[i]-u[i+1]) # linear interpolation
 
 
 # $u=0$ gives the location of the interface $\Gamma$. You can use $u=\phi-0.5$. 
@@ -169,10 +168,10 @@ def velext_simple(u, f):
 # In[4]:
 
 
-x = np.linspace(0, 1, 20)-0.42
-u = x
-f = np.sinh(x*4)+1
-pf=velext_simple(u, f)
+x = np.linspace(0, 1, 20)-0.42 # coordinate
+u = x  # interface is at x=0
+f = np.sinh(x*4)+1     # driving force
+pf=velext_simple(u, f) # projected driving force
 plt.plot(u,f, label='F')
 plt.plot(u,np.full_like(u,pf), label='P(F)')
 plt.legend()
@@ -298,7 +297,13 @@ kks1d(B=1.0, dx=0.005, ptype='5th', dfe=False)
 # -
 # 
 # For the case of the original model, the 5-th order interpolation is more stable than the 3-rd order interpolation. However, they both have an upper bound on the magnitude of the driving force.
-# 
+
+# In[ ]:
+
+
+kks1d(B=1.0, dx=0.005, ptype='3rd', dfe=True)
+
+
 # The driving force extension method does not have this upper bound.
 
 # ## Velocity extension for general cases
