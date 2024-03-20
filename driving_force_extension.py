@@ -124,7 +124,7 @@
 get_ipython().system('pip install numpy matplotlib')
 
 
-# In[1]:
+# In[ ]:
 
 
 # import needed packages
@@ -134,7 +134,7 @@ import matplotlib.pyplot as plt
 
 # Let's define some useful functions. Note that I use cell-based finite difference.
 
-# In[2]:
+# In[ ]:
 
 
 def dg(x): # 0.5 * g'(x)
@@ -152,7 +152,7 @@ def apply_bc(phi, c, xl, xr): # apply boundary conditions
 # 
 # [2] Adalsteinsson, D. and Sethian, J. The fast construction of extension velocities in level set methods. J. Comput. Phys. 148, 2-22 (1999).
 
-# In[3]:
+# In[ ]:
 
 
 # velocity extension, u is the level-set, u=0 gives the location of the interface
@@ -165,7 +165,7 @@ def velext_simple(u, f):
 
 # Let's do a quick test.
 
-# In[4]:
+# In[ ]:
 
 
 x = np.linspace(0, 1, 20)-0.42 # coordinate
@@ -179,7 +179,7 @@ plt.legend()
 
 # Now, let's implement the KKS model. We set $x_0^s=0.1$ and $x_0^l=0.9$. The molar fraction at the right boundary is fixed to be $x_0=0.5$.
 
-# In[5]:
+# In[ ]:
 
 
 def kks1d(B, dx=0.01, ptype='3rd', dfe=True):
@@ -258,37 +258,37 @@ def kks1d(B, dx=0.01, ptype='3rd', dfe=True):
 # In[ ]:
 
 
-kks1d(B=0.001, dx=0.01, ptype='3rd', dfe=False)
+get_ipython().run_cell_magic('time', '', "kks1d(B=0.001, dx=0.01, ptype='3rd', dfe=False)\n")
 
 
 # In[ ]:
 
 
-kks1d(B=0.01, dx=0.01, ptype='3rd', dfe=False)
+get_ipython().run_cell_magic('time', '', "kks1d(B=0.01, dx=0.01, ptype='3rd', dfe=False)\n")
 
 
 # In[ ]:
 
 
-kks1d(B=0.01, dx=0.01, ptype='5th', dfe=False)
+get_ipython().run_cell_magic('time', '', "kks1d(B=0.01, dx=0.01, ptype='5th', dfe=False)\n")
 
 
 # In[ ]:
 
 
-kks1d(B=0.1, dx=0.01, ptype='5th', dfe=False)
+get_ipython().run_cell_magic('time', '', "kks1d(B=0.1, dx=0.01, ptype='5th', dfe=False)\n")
 
 
 # In[ ]:
 
 
-kks1d(B=0.1, dx=0.005, ptype='5th', dfe=False)
+get_ipython().run_cell_magic('time', '', "kks1d(B=0.1, dx=0.005, ptype='5th', dfe=False)\n")
 
 
 # In[ ]:
 
 
-kks1d(B=1.0, dx=0.005, ptype='5th', dfe=False)
+get_ipython().run_cell_magic('time', '', "kks1d(B=1.0, dx=0.005, ptype='5th', dfe=False)\n")
 
 
 # You will get something like
@@ -301,7 +301,7 @@ kks1d(B=1.0, dx=0.005, ptype='5th', dfe=False)
 # In[ ]:
 
 
-kks1d(B=1.0, dx=0.005, ptype='3rd', dfe=True)
+get_ipython().run_cell_magic('time', '', "kks1d(B=1.0, dx=0.01, ptype='3rd', dfe=True)\n")
 
 
 # The driving force extension method does not have this upper bound.
@@ -312,42 +312,41 @@ kks1d(B=1.0, dx=0.005, ptype='3rd', dfe=True)
 # 
 # [3] G&oacute;mez et al, Fast methods for Eikonal equations: an experimental survey, IEEE Access (2019)
 
-# In[6]:
+# In[ ]:
 
 
 def velext_fim(u, f): # velocity extension general 1D case (fast iterative method)
     nx = u.shape[0]
     d = np.full_like(u, np.inf)       # distance function
-    s = np.full_like(u, 2, dtype=int) # 1 - distant, 0 - tentaive, -1 - initialize, -2 - converged
+    s = np.full_like(u, 2, dtype=int) # 1 - distant, 0 - tentative, -1 - initialize, -2 - converged
     w = np.empty_like(f) # extended driving force
     id = np.where(u[:-1] * u[1:] < 0)[0]
     assert id.size, "no interface!"
     for i in id:
         s[i:i+2] = -1
-        t_ = u[i] / (u[i]-u[i+1]) # linear interpolation
-        d[i] = np.abs(t_)
-        d[i+1] = np.abs(1-t_)
-        w[i] = (1-t_)*f[i]+t_*f[i+1] # extended driving force
-        w[i+1] = w[i]
+        t_ = np.abs(u[i] / (u[i]-u[i+1])) # linear interpolation
+        d[i] = t_
+        d[i+1] = 1-t_
+        w[i+1] = w[i] = (1-t_)*f[i] + t_*f[i+1] # extended driving force
     while np.any(s>-1): # loop until everything is converged
         for i in range(0, nx-1, 1): # sweep ->
             if s[i] < 1 and s[i+1] > -1:
-                d_ = d[i]+1
+                d_ = d[i] + 1
                 r_ = d[i+1] - d_ # difference
                 if r_ >= 0:
                     d[i+1] = d_ # update
-                    if r_ == 0 and s[i]<0:
+                    if r_ == 0 and s[i] < 0:
                         s[i+1] = -2 # converged
                         w[i+1] = w[i]
                     else:
                         s[i+1] = 0 # active
         for i in range(nx-1, 0, -1): # sweep <-
             if s[i] < 1 and s[i-1] > -1:
-                d_ = d[i]+1
+                d_ = d[i] + 1
                 r_ = d[i-1] - d_ # difference
                 if r_ >= 0:
                     d[i-1] = d_ # update
-                    if r_ == 0 and s[i]<0:
+                    if r_ == 0 and s[i] < 0:
                         s[i-1] = -2 # converged
                         w[i-1] = w[i]
                     else:
@@ -357,7 +356,7 @@ def velext_fim(u, f): # velocity extension general 1D case (fast iterative metho
 
 # Let's test it.
 
-# In[7]:
+# In[ ]:
 
 
 x = np.linspace(0, 1, 20)-0.42
@@ -373,6 +372,8 @@ plt.plot(x[1:-1],f[1:-1], label='F')
 plt.plot(x[1:-1],pf, label='P(F)')
 plt.legend()
 
+
+# You can try it in the KKS code, just change from 'velext_simple' to 'velext_fim'. Note the 'velext_fim' code is not optimized.
 
 # # Summary
 # 
